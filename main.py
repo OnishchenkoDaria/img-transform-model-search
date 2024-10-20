@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from sympy import symbols, limit
+import matplotlib.pyplot as plt
 
 def E(n):
     E_matrix = np.eye(n)  
@@ -19,7 +19,7 @@ def multiply_matrix(S, D):
     rows_D, cols_D = D.shape  
 
     if cols_S != rows_D:
-        raise ValueError("Matrix dimensions do not match for multiplication")
+        raise ValueError("matrix dimensions do not match for multiplication")
 
     R = np.zeros((rows_S, cols_D), dtype=float)
 
@@ -38,43 +38,61 @@ def print_matrix(matrix, label="Matrix"):
     print()
 
 def read_img():
-    # Read the image & convert it to float32 for multiplication
-    input_image = cv2.imread("x2.bmp", cv2.IMREAD_GRAYSCALE).astype(np.float32)
+    #read the image & convert it to float32 for multiplication
+    x = cv2.imread("x2.bmp", cv2.IMREAD_GRAYSCALE)
+    y = cv2.imread("y2.bmp", cv2.IMREAD_GRAYSCALE)
     
-    # Flatten the image matrix into vector
-    input_flat = input_image.flatten()
+    #display the image
+    cv2.imshow("Image x", x)
+    cv2.imshow("Image y", y)
+    #wait for the user to press a key
+    cv2.waitKey(0)
+    #close all windows
+    cv2.destroyAllWindows()
+        
+    return x.astype(np.float32), y.astype(np.float32)
+
+def transform_linear(x):
+    #flatten the image matrix into vector
+    input_flat = x.astype(float).flatten()
     
-    # Add a row of ones for the bias term
+    #add a row of 1 to fit size
     X = np.vstack([input_flat, np.ones(input_flat.shape)])
-    
+    print(f"{X}")
     return X
 
+def resize_matrix_to_smaller(A, target_shape):
+    A_resized = A[:target_shape[0], :target_shape[1]]
+    return A_resized
+
 def Moor_Penrose_formula(A_t, E_matrix, A, d):
-    mult = multiply_matrix(A, A_t)
-    #print_matrix(mult)
+    mult = A @ A_t
     
     mult1 = d**2 * E_matrix
-    #print_matrix(mult1)
 
     mult2 = np.linalg.inv(mult + mult1)
-    #rint_matrix(mult2)
 
-    #d = symbols('d')
-    expr = multiply_matrix(A_t, mult2)
-    A_ps_inv = limit(expr, d**2, 0)
-    return A_ps_inv
+    expr = A_t @ mult2
+    return expr
 
 def Moor_Penrose_method(A):
     # A_ps_inv - pseudo inverse A matrix
-    epsilon = 1e-4
-    A_t = transposed_matrix(A)
-    
+    epsilon = 1e-4    
     rows, columns = A.shape
+
+    A_t = transposed_matrix(A)
+    print(f"rows, columns: {rows, columns}")
+
     d = 0.1
-    E_matrix = E(rows) #should be colums but too big matrix
+    E_matrix = E(columns)
+
+    #resize to match the required dimensions for multiplication
+    target_shape = (columns, A.shape[1]) 
+    A = resize_matrix_to_smaller(A, target_shape)
+    A_t = resize_matrix_to_smaller(A_t, (A.shape[1], columns))
 
     prev_guess = Moor_Penrose_formula(A_t, E_matrix, A, d)
-    next_guess = Moor_Penrose_formula(A_t, E_matrix, A, d/2)
+    next_guess = Moor_Penrose_formula(A_t, E_matrix, A, d / 2)
 
     while np.linalg.norm(next_guess - prev_guess, np.inf) > epsilon:
         prev_guess = next_guess
@@ -83,17 +101,19 @@ def Moor_Penrose_method(A):
     
     A_ps_inv = next_guess
     print(A_ps_inv)
-    """ 
-    # Calculate the inner expression
-    inner_expr = np.linalg.inv(multiply_matrix(A, A_t) + d**2 * E_matrix)
-    
-    # Calculate the pseudo-inverse
-    expr = multiply_matrix(inner_expr, A_t)
-    A_ps_inv = limit(expr, d**2, 0)
-    
-    print_matrix(A_ps_inv, "Moor-Penrose")"""
     return 
 
+def pseudo_inverse_check(A, A_ps_inv):
+    result1 = A @ A_ps_inv @ A
+    if not np.allclose(result1, A):
+        return False
+
+    result2 = A_ps_inv @ A @ A_ps_inv
+    if not np.allclose(result2, A_ps_inv):
+        return False
+
+    return True
+
 if __name__ == "__main__":
-    X = read_img()
+    X, Y = read_img()
     Moor_Penrose_method(X)
