@@ -26,3 +26,5 @@ def check_pseudo_inverse_properties_mse(A, A_ps_inv):
     print("Checking property: A A^+ is symmetric")
     condition_4 = is_symmetric(A @ A_ps_inv)
     print(f"Condition 4 (A A^+ symmetric): {condition_4}\n")
+
+    return mse_1, mse_2, condition_3, condition_4

@@ -79,7 +79,7 @@ def model_by_Moore_Penrose_gradient(X, Y):
     E = np.eye(X.shape[0])
     
     print(X_ps_inv)
-    check_pseudo_inverse_properties_mse(X, 255-X_ps_inv)
+    c1, c2, c3, c4 = check_pseudo_inverse_properties_mse(X, 255-X_ps_inv)
     
     A = find_A_model_MP(X, Y, X_ps_inv, E)
     Y_img = A @ X
@@ -90,3 +90,5 @@ def model_by_Moore_Penrose_gradient(X, Y):
     cv2.imshow("Transformed Image", Yimage_projected_MP)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    return c1, c2, c3, c4

@@ -82,7 +82,7 @@ def model_by_SVD(X, Y):
     X_ps_inv = SVD_method(X)
     print(X_ps_inv)
     
-    check_pseudo_inverse_properties_mse(X, X_ps_inv)
+    c1, c2, c3, c4 = check_pseudo_inverse_properties_mse(X, X_ps_inv)
 
     A = find_A_model_MP(X, Y, X_ps_inv, np.eye(X.shape[0]))
     Y_img = A @ X
@@ -93,7 +93,5 @@ def model_by_SVD(X, Y):
     cv2.imshow("Transformed Image", Yimage_projected_MP)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    X, Y = read_img()
-    model_by_SVD(X, Y)
+    
+    return c1, c2, c3, c4

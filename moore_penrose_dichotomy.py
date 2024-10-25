@@ -88,7 +88,7 @@ def model_by_Moore_Penrose_dichotomy(X, Y):
     E = E_matrix_mp
 
     print(X_ps_inv)
-    check_pseudo_inverse_properties_mse(X, X_ps_inv)
+    c1, c2, c3, c4 = check_pseudo_inverse_properties_mse(X, X_ps_inv)
 
     A = find_A_model_MP(X, Y, X_ps_inv, E)
     Y_img = A @ X
@@ -99,3 +99,5 @@ def model_by_Moore_Penrose_dichotomy(X, Y):
     cv2.imshow("Transformed Image", Yimage_projected_MP)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    return c1, c2, c3, c4
