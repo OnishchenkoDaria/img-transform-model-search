@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
+from check import check_pseudo_inverse_properties_mse
+
 
 #transposes a matrix
 def transposed_matrix(S):
@@ -75,9 +76,14 @@ def find_A_model_MP(X, Y, X_ps_inv, E_matrix):
     return A
 
 # Applies the Moore-Penrose inverse model to transform the image
-def model_by_Moore_Penrose(X, Y):
+def model_by_SVD(X, Y):
+    print("\n****** SVD METHOD ******\n")
+
     X_ps_inv = SVD_method(X)
+    print(X_ps_inv)
     
+    check_pseudo_inverse_properties_mse(X, X_ps_inv)
+
     A = find_A_model_MP(X, Y, X_ps_inv, np.eye(X.shape[0]))
     Y_img = A @ X
     
@@ -90,4 +96,4 @@ def model_by_Moore_Penrose(X, Y):
 
 if __name__ == "__main__":
     X, Y = read_img()
-    model_by_Moore_Penrose(X, Y)
+    model_by_SVD(X, Y)

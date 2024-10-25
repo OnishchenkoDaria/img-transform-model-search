@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from check import check_pseudo_inverse_properties_mse
 
 def transposed_matrix(S):
     rows, cols = S.shape
@@ -9,26 +10,6 @@ def transposed_matrix(S):
         for j in range(cols):
             S_t[j][i] = S[i][j] 
     return S_t
-
-#reading input images X and Y
-def read_img():
-    #read the image & convert it to float32 for multiplication
-    x_img = cv2.imread("x2.bmp", cv2.IMREAD_GRAYSCALE)
-    y_img = cv2.imread("y2.bmp", cv2.IMREAD_GRAYSCALE)
-    
-    #display the image
-    cv2.imshow("Image x", x_img)
-    cv2.imshow("Image y", y_img)
-    #wait for the user to press a key
-    cv2.waitKey(0)
-    #close all windows
-    cv2.destroyAllWindows()
-        
-    x = x_img.astype(float)
-    y = y_img.astype(float)
-
-    print(f"x size: {x.shape} , y size: {y.shape}")
-    return x, y
 
 def resize_matrix_to_smaller(A, target_shape):
     A_resized = A[:target_shape[0], :target_shape[1]]
@@ -50,7 +31,6 @@ def Moor_Penrose_method_dichotomy(A):
     rows, columns = A.shape
 
     A_t = transposed_matrix(A)
-    print(f"rows, columns: {rows, columns}")
 
     d = 0.1
     E_matrix = np.eye(columns)
@@ -69,7 +49,6 @@ def Moor_Penrose_method_dichotomy(A):
         next_guess = Moor_Penrose_formula(A_t, E_matrix, A, d)
     
     A_ps_inv = next_guess
-    print(A_ps_inv)
     #pseudo_inverse_check(A, A_ps_inv)
     return A, A_ps_inv, E_matrix
 
@@ -91,30 +70,27 @@ def find_A_model_MP(X, Y, X_ps_inv, E_matrix):
     # A = Y * X^+ + V * Z_t (X_t)
     Z_Xt = E_matrix - X @ X_ps_inv
     Z_t_Xt = transposed_matrix(Z_Xt)
-    print(Z_t_Xt)
 
     V = np.zeros((Y.shape[0], X.shape[0]), dtype=float)
 
-    print(Y.shape, X_ps_inv.shape, V.shape, Z_t_Xt.shape)
     # resize all to the rows size of matrix Y
 
     A = (Y @ X_ps_inv) + (V @ Z_t_Xt)
-    print(A)
     return A
 
-def model_by_Moore_Penrose(X, Y):
+def model_by_Moore_Penrose_dichotomy(X, Y):
+    print("\n****** MP WITH DICHOTOMY METHOD ******\n")
     X_mp, X_ps_inv_mp, E_matrix_mp = Moor_Penrose_method_dichotomy(X)    
     resize_matrix_to_smaller(X_ps_inv_mp, (Y.shape[1], Y.shape[1]))
-
-    check1 = X_mp @ X_ps_inv_mp @ X_mp
 
     X_ps_inv = X_ps_inv_mp 
     X = X_mp
     E = E_matrix_mp
-    print("Using dichotomy-based pseudo-inverse")
+
+    print(X_ps_inv)
+    check_pseudo_inverse_properties_mse(X, X_ps_inv)
 
     A = find_A_model_MP(X, Y, X_ps_inv, E)
-    print(A.shape, X.shape)
     Y_img = A @ X
     
     # Transform the matrix back into an image
@@ -123,7 +99,3 @@ def model_by_Moore_Penrose(X, Y):
     cv2.imshow("Transformed Image", Yimage_projected_MP)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    X, Y = read_img()
-    model_by_Moore_Penrose(X, Y)
