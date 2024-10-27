@@ -92,7 +92,7 @@ def model_by_Moore_Penrose_dichotomy(X, Y):
 
     A = find_A_model_MP(X, Y, X_ps_inv, E)
     Y_img = A @ X
-    
+
     # Transform the matrix back into an image
     Yimage_projected_MP = project_matrix_to_range(Y_img)
 
@@ -100,4 +100,4 @@ def model_by_Moore_Penrose_dichotomy(X, Y):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    return c1, c2, c3, c4
+    return c1, c2, c3, c4, Y_img

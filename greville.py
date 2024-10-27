@@ -81,5 +81,5 @@ def model_by_Greville(X, Y):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    return c1, c2, c3, c4
+    return c1, c2, c3, c4, Y_img
 

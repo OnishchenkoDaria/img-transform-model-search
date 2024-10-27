@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 from check import check_pseudo_inverse_properties_mse
 
-
 #transposes a matrix
 def transposed_matrix(S):
     rows, cols = S.shape
@@ -15,22 +14,6 @@ def transposed_matrix(S):
 def resize_matrix_to_smaller(A, target_shape):
     A_resized = A[:target_shape[0], :target_shape[1]]
     return A_resized
-
-#reads the input images X and Y
-def read_img():
-    x_img = cv2.imread("x2.bmp", cv2.IMREAD_GRAYSCALE)
-    y_img = cv2.imread("y2.bmp", cv2.IMREAD_GRAYSCALE)
-    
-    cv2.imshow("Image x", x_img)
-    cv2.imshow("Image y", y_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-        
-    x = x_img.astype(float)
-    y = y_img.astype(float)
-
-    return x, y
-
 
 def pseudo_inverse_from_L(L):
     rows, columns = L.shape
@@ -86,7 +69,7 @@ def model_by_SVD(X, Y):
 
     A = find_A_model_MP(X, Y, X_ps_inv, np.eye(X.shape[0]))
     Y_img = A @ X
-    
+
     # Project and normalize the result matrix to a clear image
     Yimage_projected_MP = project_matrix_to_range(Y_img)
 
@@ -94,4 +77,4 @@ def model_by_SVD(X, Y):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-    return c1, c2, c3, c4
+    return c1, c2, c3, c4, Y_img
